@@ -1,5 +1,6 @@
 ﻿using MyApiProject.Core.Entities;
 using MyApiProject.Core.Specifications;
+using MyApiProject.Core.Specifications.Products_Specs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +13,18 @@ namespace MyApiProject.Core.Products_Specs
     public class ProductWithBrandAndCategorySpecification : BaseSpecification<Product>
     {
         //This Constractor Will Be Used For Creating Object For GetAll Products
-        public ProductWithBrandAndCategorySpecification(string? sorting) : base()
+        public ProductWithBrandAndCategorySpecification(ProductsSpecParams productSpec) : 
+            base(p=>(!productSpec.BrandId.HasValue || p.BrandId == productSpec.BrandId.Value)
+            &&
+            (!productSpec.CategoryId.HasValue || p.CategoryId == productSpec.CategoryId.Value)
+            )
         {
             Include.Add(P => P.Brand);
             Include.Add(P => P.Category);
 
-            if (!string.IsNullOrEmpty(sorting))
+            if (!string.IsNullOrEmpty(productSpec.Sort))
             {
-                switch (sorting) 
+                switch (productSpec.Sort) 
                 { 
                     case "priceAsc":
                         AddOrderBy(P => P.Price);
@@ -36,6 +41,12 @@ namespace MyApiProject.Core.Products_Specs
             {
                 AddOrderBy(P => P.Name);
             }
+
+            //Total = 1000;
+            //pageIndex = 9 
+            //pageSize = 50
+
+            ApplyPagination(productSpec.PageSize * (productSpec.PageIndex - 1), productSpec.PageSize); 
         }
 
         public ProductWithBrandAndCategorySpecification(int id) : base(P => P.Id == id)

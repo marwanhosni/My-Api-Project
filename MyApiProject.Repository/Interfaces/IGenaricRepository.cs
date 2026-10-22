@@ -9,6 +9,8 @@ public interface IGenaricRepository<T> where T : BaseEntity
      Task<T?> GetByIdAsync(int id);
      Task<T?> GetByIdWithSpecAsync(ISpecification<T> spec);
 
-    Task<IEnumerable<T>> GetAllAsync();
-    Task<IEnumerable<T>> GetAllWithSpecAsync(ISpecification<T> spec);
+    Task<IReadOnlyList<T>> GetAllAsync();
+    Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecification<T> spec);
+
+    Task<int> GetCountAsync(ISpecification<T> spec);
 }

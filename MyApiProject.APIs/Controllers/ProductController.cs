@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApiProject.APIs.Dtos;
 using MyApiProject.APIs.Errors;
+using MyApiProject.APIs.Helpers;
 using MyApiProject.Core.Entities;
 using MyApiProject.Core.Products_Specs;
+using MyApiProject.Core.Specifications.Products_Specs;
 using MyApiProject.Repository.Interfaces;
 
 namespace MyApiProject.APIs.Controllers;
@@ -23,14 +25,17 @@ public class ProductController : BaseApiController
         _brandsRepo = brandsRepo;
         _categoriesRepo = categoriesRepo;
     }
+    // If Number Of Barams Increase Than 5 Params ==> Make A class And put Params In It 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetAll([FromQuery]string? sorting)
+    public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetAll([FromQuery]ProductsSpecParams productSpec)
     {
         //var products = await _productRepo.GetAllAsync();
-        var Spec = new ProductWithBrandAndCategorySpecification(sorting);
+        var Spec = new ProductWithBrandAndCategorySpecification(productSpec);
         var products = await _productRepo.GetAllWithSpecAsync(Spec);
-        var result = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductToReturnDto>>(products);
-        return Ok(result);
+        var result = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products);
+        var countSpec = new ProductWithCountSpecifications(productSpec);
+        var count = await _productRepo.GetCountAsync(countSpec);
+        return Ok(new Paginations<ProductToReturnDto>(productSpec.PageSize, productSpec.PageIndex, count, result));
     }
     [HttpGet(template: "{id}")]
     public async Task<ActionResult<ProductToReturnDto>> GetById(int Id)

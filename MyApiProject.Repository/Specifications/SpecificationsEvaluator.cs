@@ -26,6 +26,9 @@ public class SpecificationsEvaluator<TEntity> where TEntity : BaseEntity
             query = query.OrderByDescending(spec.OrderByDesc);
         // _context.Set<Product>().OrderByDescending(p=>p.Name)
 
+        if (spec.IsPaginationEnable)
+            query = query.Skip(spec.Skip).Take(spec.Take);
+
         query = spec.Include.Aggregate(query, (current, includeExpression) => current.Include(includeExpression));
         //_context.products.Where(P => P.Id == id).Include(P => P.Brand).Include(P => P.Category).FirstOrDefaultAsync() ;
         //_context.products.Where(P => P.Id == id).OrderBy(p=>=p.Name).Include(P => P.Brand).Include(P => P.Category).FirstOrDefaultAsync() ;
