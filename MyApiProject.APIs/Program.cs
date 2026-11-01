@@ -1,20 +1,25 @@
 
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyApiProject.APIs.Errors;
 using MyApiProject.APIs.Extensions;
 using MyApiProject.APIs.Helpers;
 using MyApiProject.APIs.Middlewares;
+using MyApiProject.Core.Entities.Identity;
 using MyApiProject.Repository;
+using MyApiProject.Repository.Identity;
+using MyApiProject.Repository.Identity.DataSeed;
 using MyApiProject.Repository.Implementations;
 using MyApiProject.Repository.Interfaces;
+using StackExchange.Redis;
 
 namespace MyApiProject.APIs
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -22,9 +27,27 @@ namespace MyApiProject.APIs
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
             });
 
+            //Redis
+            builder.Services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
+            {
+                var connectionString = builder.Configuration.GetConnectionString("Redis");
+                return ConnectionMultiplexer.Connect(connectionString);
+            });
+
+            //Identity DbContext
+            builder.Services.AddDbContext<AppIdentityDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
+            });
+
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddScoped<IBasketRepository,BasketRepository>() ;
+            builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+            }).AddEntityFrameworkStores<AppIdentityDbContext>();
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
             builder.Services.AddEndpointsApiExplorer();
@@ -42,6 +65,7 @@ namespace MyApiProject.APIs
             var services = scope.ServiceProvider;
 
             var _context = services.GetRequiredService<AppDbContext>();
+            var _IdentityDBContext = services.GetRequiredService<AppIdentityDbContext>();
 
 
             var LoggerFactory = services.GetRequiredService<ILoggerFactory>();
@@ -49,11 +73,12 @@ namespace MyApiProject.APIs
 
             try
             {
-                _context.Database.MigrateAsync();
-
+                await _context.Database.MigrateAsync(); // Update DataBase (Business )
                 //Data Seeding
-                 AppDbContextSeed.SeedAsync(_context);
-
+                await AppDbContextSeed.SeedAsync(_context);
+                await _IdentityDBContext.Database.MigrateAsync(); // Update DataBase (Identity)
+                var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                await AppIdentityDbContextSeed.SeedUSerAsync(userManager);
             }
             catch (Exception ex)
             {

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\MyApiProject.Core\MyApiProject.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Identity\Configurations\" />
+  </ItemGroup>
+
 </Project>
