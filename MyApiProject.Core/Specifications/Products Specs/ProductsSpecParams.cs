@@ -7,6 +7,14 @@ using System.Threading.Tasks;
 namespace MyApiProject.Core.Specifications.Products_Specs;
 public  class ProductsSpecParams
 {
+    private string? search;
+
+    public string? Search
+    {
+        get { return search; }
+        set { search = value.ToLower(); }
+    }
+
     public int PageIndex { get; set; } = 1;
 
     private const int MaxPageSize = 5;	

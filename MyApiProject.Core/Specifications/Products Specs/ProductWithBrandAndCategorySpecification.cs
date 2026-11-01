@@ -14,7 +14,10 @@ namespace MyApiProject.Core.Products_Specs
     {
         //This Constractor Will Be Used For Creating Object For GetAll Products
         public ProductWithBrandAndCategorySpecification(ProductsSpecParams productSpec) : 
-            base(p=>(!productSpec.BrandId.HasValue || p.BrandId == productSpec.BrandId.Value)
+            base(p=>
+            (string.IsNullOrEmpty(productSpec.Search) || p.Name.Contains(productSpec.Search))
+            &&
+            (!productSpec.BrandId.HasValue || p.BrandId == productSpec.BrandId.Value)
             &&
             (!productSpec.CategoryId.HasValue || p.CategoryId == productSpec.CategoryId.Value)
             )
