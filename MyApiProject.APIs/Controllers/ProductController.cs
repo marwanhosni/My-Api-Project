@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApiProject.APIs.Dtos;
@@ -26,6 +28,9 @@ public class ProductController : BaseApiController
         _categoriesRepo = categoriesRepo;
     }
     // If Number Of Barams Increase Than 5 Params ==> Make A class And put Params In It 
+    // Default Schema Is Bearer Not Cookie
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetAll([FromQuery]ProductsSpecParams productSpec)
     {
@@ -37,6 +42,8 @@ public class ProductController : BaseApiController
         var count = await _productRepo.GetCountAsync(countSpec);
         return Ok(new Paginations<ProductToReturnDto>(productSpec.PageSize, productSpec.PageIndex, count, result));
     }
+
+    [Authorize(AuthenticationSchemes ="Bearer")]
     [HttpGet(template: "{id}")]
     public async Task<ActionResult<ProductToReturnDto>> GetById(int Id)
     {

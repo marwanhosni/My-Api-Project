@@ -51,5 +51,8 @@ public class GenaricRepository<T> : IGenaricRepository<T> where T : BaseEntity
         return SpecificationsEvaluator<T>.GetQuery(_context.Set<T>().AsQueryable(), spec);
     }
 
-  
+    public async Task Add(T item) => await _context.Set<T>().AddAsync(item);
+
+    public void Update(T item) =>  _context.Set<T>().Update(item);
+    public void Delete(T item) =>  _context.Set<T>().Remove(item);
 }

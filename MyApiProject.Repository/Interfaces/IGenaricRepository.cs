@@ -13,4 +13,9 @@ public interface IGenaricRepository<T> where T : BaseEntity
     Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecification<T> spec);
 
     Task<int> GetCountAsync(ISpecification<T> spec);
+
+
+    Task Add(T item);
+    void Update(T item);
+    void Delete(T item);
 }

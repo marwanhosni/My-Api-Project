@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyApiProject.Core.Entities;
+using MyApiProject.Core.Entities.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,4 +27,7 @@ public class AppDbContext : DbContext
     public DbSet<ProductCategory> ProductCategories { get; set; }
     public DbSet<Department> Departments { get; set; }
     public DbSet<Employee> Employees { get; set; }
+    public DbSet<Order> Orders{ get; set; }
+    public DbSet<OrderItem> OrderItems{ get; set; }
+    public DbSet<DeliveryMethods> DeliveryMethods{ get; set; }
 }

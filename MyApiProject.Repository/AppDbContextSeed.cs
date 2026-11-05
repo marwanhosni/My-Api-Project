@@ -1,4 +1,5 @@
 ﻿using MyApiProject.Core.Entities;
+using MyApiProject.Core.Entities.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,6 +68,27 @@ public class AppDbContextSeed
                 await _context.SaveChangesAsync();
             }
         }
+        //===================================================================================================
+        //DataSeed DeleviryMethods
+
+        if (_context.DeliveryMethods.Count() == 0)
+
+        {
+
+            var deleviryData = File.ReadAllText(path: "../MyApiProject.Repository/Data/DataSeed/delivery.json");
+
+            var deleviryMethods = JsonSerializer.Deserialize<List<DeliveryMethods>>(deleviryData);
+
+            if (deleviryMethods.Count() > 0)
+            {
+                foreach (var delivery in deleviryMethods)
+                {
+                    _context.DeliveryMethods.Add(delivery);
+                }
+                await _context.SaveChangesAsync();
+            }
+        }
+
 
     }
 }

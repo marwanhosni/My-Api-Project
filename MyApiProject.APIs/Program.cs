@@ -1,18 +1,23 @@
 
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using MyApiProject.APIs.Errors;
 using MyApiProject.APIs.Extensions;
 using MyApiProject.APIs.Helpers;
 using MyApiProject.APIs.Middlewares;
 using MyApiProject.Core.Entities.Identity;
+using MyApiProject.Core.Services.Interface;
 using MyApiProject.Repository;
 using MyApiProject.Repository.Identity;
 using MyApiProject.Repository.Identity.DataSeed;
 using MyApiProject.Repository.Implementations;
 using MyApiProject.Repository.Interfaces;
+using MyApiProject.Service;
 using StackExchange.Redis;
 
 namespace MyApiProject.APIs
@@ -43,10 +48,29 @@ namespace MyApiProject.APIs
             // Add services to the container.
 
             builder.Services.AddControllers();
-            builder.Services.AddScoped<IBasketRepository,BasketRepository>() ;
+            //builder.Services.AddScoped<IBasketRepository,BasketRepository>() ;
+            //builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
             {
             }).AddEntityFrameworkStores<AppIdentityDbContext>();
+
+            builder.Services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                           .AddJwtBearer(options => {
+                               options.TokenValidationParameters = new TokenValidationParameters() {
+                                   ValidateIssuer = true,
+                                   ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                                   ValidateAudience = true,
+                                   ValidAudience = builder.Configuration["Jwt:Audience"],
+                                   ValidateLifetime = true,
+                                   ValidateIssuerSigningKey = true,
+                                   IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                               };
+
+
+                           });
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
@@ -102,6 +126,8 @@ namespace MyApiProject.APIs
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

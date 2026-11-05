@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyApiProject.APIs.Errors;
 using MyApiProject.APIs.Helpers;
+using MyApiProject.Repository;
 using MyApiProject.Repository.Implementations;
 using MyApiProject.Repository.Interfaces;
-
+using MyApiProject.Core.Services.Interface;
+using MyApiProject.Service;
 namespace MyApiProject.APIs.Extensions;
 
 public static class ApplicationServicesExensions
@@ -11,6 +13,10 @@ public static class ApplicationServicesExensions
     public static IServiceCollection ApplicationServices(this IServiceCollection services)
     {
         services.AddScoped(typeof(IGenaricRepository<>), typeof(GenaricRepository<>));
+        services.AddScoped<IBasketRepository, BasketRepository>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IOrderService, OrderService>();
         services.AddAutoMapper(typeof(MappingProfiles));
         services.Configure<ApiBehaviorOptions>(ApiBehaviorOptions =>
         {
@@ -20,7 +26,7 @@ public static class ApplicationServicesExensions
                 .Where(e => e.Value.Errors.Count > 0)
                 .SelectMany(x => x.Value.Errors)
                 .Select(x => x.ErrorMessage).ToArray();
-                var errorResponse = new ApiValidationResponse(400, errors);
+                var errorResponse = new ApiValidationResponse(_statusCode: 400, errors);
                 return new BadRequestObjectResult(errorResponse);
             };
         });
