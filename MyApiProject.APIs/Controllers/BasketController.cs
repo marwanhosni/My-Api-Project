@@ -29,7 +29,7 @@ public class BasketController : ControllerBase
 
     // POST : /api/Basket
     [HttpPost]
-    public async Task<ActionResult<CustomerBasket>> UpdateBasket(CustmorBasketDto basket)
+    public async Task<ActionResult<CustomerBasket>> CreateOrUpdateBasket(CustmorBasketDto basket)
     {
         var mappedBasket = _mapper.Map<CustmorBasketDto, CustomerBasket>(basket);
         var CraeteOrUpdate = await _basketRepository.UpdateBasketAsync(mappedBasket);

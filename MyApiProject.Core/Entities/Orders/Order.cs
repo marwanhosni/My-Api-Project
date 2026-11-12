@@ -11,13 +11,14 @@ public class Order : BaseEntity
     {
         
     }
-    public Order(string buyerEmail, Address shippingAddress, DeliveryMethods deliveryMethods, ICollection<OrderItem> items, decimal subtotal)
+    public Order(string buyerEmail, Address shippingAddress, DeliveryMethods deliveryMethods, ICollection<OrderItem> items, decimal subtotal , string paymentIntentId)
     {
         BuyerEmail = buyerEmail;
         ShippingAddress = shippingAddress;
         DeliveryMethods = deliveryMethods;
         Items = items;
         Subtotal = subtotal;
+        PaymentIntentId = paymentIntentId;
     }
 
     public string BuyerEmail { get; set; }
@@ -36,7 +37,7 @@ public class Order : BaseEntity
 
     public decimal GetTotal () => Subtotal + DeliveryMethods.Cost;
 
-    public string PaymentIntentId { get; set; } = string.Empty;
+    public string PaymentIntentId { get; set; }
 
 
 

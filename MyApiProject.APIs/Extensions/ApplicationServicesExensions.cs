@@ -17,6 +17,7 @@ public static class ApplicationServicesExensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IPaymentServices, PaymentServices>();
         services.AddAutoMapper(typeof(MappingProfiles));
         services.Configure<ApiBehaviorOptions>(ApiBehaviorOptions =>
         {

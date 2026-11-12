@@ -4,6 +4,7 @@ using MyApiProject.Core.Entities;
 using MyApiProject.Core.Entities.Identity;
 using UserAddress = MyApiProject.Core.Entities.Identity.Address;
 using OrderAddress = MyApiProject.Core.Entities.Orders.Address;
+using MyApiProject.Core.Entities.Orders;
 
 namespace MyApiProject.APIs.Helpers;
 
@@ -23,13 +24,24 @@ public class MappingProfiles : Profile
                 new[] { '@' },
                 StringSplitOptions.None)[0]));
         CreateMap<BasketItemDto, BasketItem>()
-    .ReverseMap();
+         .ReverseMap();
 
-        CreateMap<CustmorBasketDto, CustomerBasket>()
+        CreateMap< CustomerBasket, CustmorBasketDto>()
             .ReverseMap();
+
         CreateMap<RegisterDto, AppUser>().ReverseMap();
         CreateMap<UserAddress, AddressDto>().ReverseMap();
         CreateMap<OrderAddress, AddressDto>().ReverseMap();
+
+        CreateMap<Order, OrderToReturnDto>()
+            .ForMember(o => o.DeliveryMethods, o => o.MapFrom(o => o.DeliveryMethods.ShortName))
+            .ForMember(o => o.DeliveryMethodsCost, o => o.MapFrom(o => o.DeliveryMethods.Cost));
+
+        CreateMap<OrderItem, OrderItemDto>()
+            .ForMember(o => o.ProductId, o => o.MapFrom(s => s.Product.ProductId))
+            .ForMember(o => o.ProductName, o => o.MapFrom(s => s.Product.ProductName))
+            .ForMember(o => o.PictureUrl, o => o.MapFrom(s=>s.Product.PictureUrl))
+            .ForMember(D => D.PictureUrl, O => O.MapFrom<OrderItemPictureUrlResolver>());
 
     }
 }

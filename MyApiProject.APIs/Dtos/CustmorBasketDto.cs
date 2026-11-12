@@ -9,5 +9,8 @@ namespace MyApiProject.APIs.Dtos
         public string Id { get; set; } = null!;
         [Required]
         public List<BasketItemDto> Items { get; set; } = null!;
+        public int? DeliveryMethodsId { get; set; }
+        public string? PaymentIntentId { get; set; }
+        public string? ClientSecret { get; set; }
     }
 }

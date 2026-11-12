@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace MyApiProject.Repository.Interfaces;
 public interface IOrderService
 {
-    public Task<Order?> GreateOrderAsync(string BuyerName , string BasketId , int DeleviryMethodId , Address ShippingAddress);
+    public  Task<Order?> GreateOrderAsync(string BuyerName , string BasketId , int DeleviryMethodId , Address ShippingAddress);
     
-    public Task<IReadOnlyList<Order>?> GetOrederForSpecAsync(string Email);
+    public  Task<IReadOnlyList<Order>?> GetOrederForSpecAsync(string Email);
 
-    public Task<Order?> GetOrederByIdForSpecAsync(int Id, string Email);
+    public  Task<Order?> GetOrederByIdForSpecAsync(int Id, string Email);
 
 }

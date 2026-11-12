@@ -1,5 +1,7 @@
 ﻿using MyApiProject.Core.Entities;
 using MyApiProject.Core.Entities.Orders;
+using MyApiProject.Core.Services.Interface;
+using MyApiProject.Core.Specifications.Order_Specs;
 using MyApiProject.Repository.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -12,12 +14,15 @@ public class OrderService : IOrderService
 {
     private readonly IBasketRepository _basketRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPaymentServices _paymentServices;
 
     public OrderService(IBasketRepository basketRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IPaymentServices paymentServices)
     {
         _basketRepository = basketRepository;
         _unitOfWork = unitOfWork;
+        _paymentServices = paymentServices;
     }
     public async Task<Order?> GreateOrderAsync(string BuyerEmail, string BasketId, int DeleviryMethodId, Address ShippingAddress)
     {
@@ -45,8 +50,17 @@ public class OrderService : IOrderService
         //4. Delevery Method
         var deleveryMethod = await _unitOfWork.Repository<DeliveryMethods>().GetByIdAsync(DeleviryMethodId);
 
+        // Check if Payment Intent Is is Existing  From Another Order
+        var spec = new OrderPaymentSpecifiactions(basket.PaymentIntentId);
+        var ExistOrder = await _unitOfWork.Repository<Order>().GetByIdWithSpecAsync(spec);
+        if(ExistOrder is not null)
+        {
+             _unitOfWork.Repository<Order>().Delete(ExistOrder)    ;
+            // Update PaymentIntent If With Amount Of Basket If Changed   
+            basket =  await _paymentServices.CreateOrUpdatePaymentIntent(BasketId);
+        }
         //5. Create Order
-        var order = new Order(BuyerEmail, ShippingAddress, deleveryMethod,OrderItems,subtotal);
+        var order = new Order(BuyerEmail, ShippingAddress, deleveryMethod,OrderItems,subtotal , basket.PaymentIntentId);
 
         //6. Add Order Locally
         await _unitOfWork.Repository<Order>().Add(order);
@@ -57,14 +71,18 @@ public class OrderService : IOrderService
         return result > 0 ? order : null;
     }
 
-    public Task<IReadOnlyList<Order>?> GetOrederForSpecAsync(string Email)
+    public async Task<IReadOnlyList<Order>?> GetOrederForSpecAsync(string Email)
     {
-        throw new NotImplementedException();
-
+        var spec = new OrderSpecifications(Email);
+        var orders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(spec);
+        return orders;
     }
-    public Task<Order?> GetOrederByIdForSpecAsync(int Id, string Email)
+    public async Task<Order?> GetOrederByIdForSpecAsync(int Id, string Email)
     {
-        throw new NotImplementedException();
+        var spec = new OrderSpecifications(Email, Id);
+        var orders = await   _unitOfWork.Repository<Order>().GetByIdWithSpecAsync(spec );
+        if(orders == null) return null;
+        return orders;
     }
 
     
